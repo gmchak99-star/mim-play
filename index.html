@@ -2,657 +2,735 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>컬컴 영어 1,000회 마스터 & 커스텀 입력 플레이어</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>영어회화 96패턴 무한 섀도잉 플레이어</title>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 14px 10px 100px; background: #f8fafc; color: #0f172a; margin: 0; }
-    h2 { text-align: center; font-size: 1.25rem; margin: 8px 0 4px; color: #0f172a; }
-    .sub-title { text-align: center; font-size: 0.82rem; color: #64748b; margin-bottom: 12px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px 14px; background: #f8fafc; color: #1e293b; max-width: 920px; margin: auto; }
+    h2 { color: #0f172a; text-align: center; margin-bottom: 6px; font-size: 1.35rem; }
+    .sub-text { text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 16px; }
+    
+    .course-tab-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; }
+    .course-btn { flex: 1; max-width: 260px; padding: 12px 10px; font-size: 1.05rem; font-weight: 800; border: 2px solid #94a3b8; border-radius: 12px; background: white; color: #334155; cursor: pointer; transition: all 0.2s; }
+    .course-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
 
-    /* 대분류 코스 선택 */
-    .course-wrap { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
-    .course-btn { flex: 1; max-width: 140px; padding: 10px 4px; font-weight: bold; font-size: 0.88rem; border: 2px solid #94a3b8; border-radius: 8px; background: white; color: #334155; cursor: pointer; }
-    .course-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
-    .course-btn.review-tab { border-color: #e11d48; color: #e11d48; }
-    .course-btn.review-tab.active { background: #e11d48; color: white; }
-
-    /* 일차 선택 */
-    .day-wrap { display: flex; gap: 5px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
-    .day-btn { flex: 1; min-width: 75px; max-width: 100px; padding: 8px 2px; font-weight: 700; font-size: 0.82rem; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #475569; cursor: pointer; }
+    .day-tab-container { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .day-btn { flex: 1; min-width: 75px; max-width: 160px; padding: 10px 6px; font-size: 0.9rem; font-weight: bold; border: 2px solid #cbd5e1; border-radius: 10px; background: white; color: #475569; cursor: pointer; }
     .day-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-
-    /* 카드 */
-    .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
-    .pattern-header { font-size: 0.92rem; font-weight: 700; color: #2563eb; margin-bottom: 8px; }
     
-    .qa-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px; }
-    .ko-text { font-size: 0.98rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; line-height: 1.4; }
-    .en-text { font-size: 0.95rem; font-weight: 600; color: #0284c7; min-height: 22px; margin-bottom: 8px; line-height: 1.4; }
-    .en-text.hidden { filter: blur(6px); background: #e2e8f0; color: transparent; user-select: none; border-radius: 4px; }
+    .system-bar { background: #e0f2fe; border: 1px solid #bae6fd; padding: 12px 14px; border-radius: 10px; font-size: 0.85rem; color: #0369a1; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .system-controls { display: flex; align-items: center; gap: 10px; }
+    .btn-pip { background: #7c3aed; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
 
-    /* 제어 버튼군 */
-    .ctrl-row { display: flex; gap: 5px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
-    .ctrl-btn { border: none; border-radius: 5px; padding: 7px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-    .btn-ans { background: #475569; color: white; }
-    .opt-btn { background: white; border: 1px solid #cbd5e1; color: #334155; }
+    #pip-video { width: 1px; height: 1px; opacity: 0.01; position: absolute; pointer-events: none; }
+    #pip-canvas { display: none; }
+
+    .pattern-card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    .pattern-title { font-weight: 700; font-size: 1.05rem; color: #2563eb; margin-bottom: 10px; }
+    .sentence-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; padding: 12px; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; }
+    @media (min-width: 780px) {
+      .sentence-row { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    .text-box { flex: 1; }
+    .en { font-size: 1.02rem; font-weight: 600; color: #0f172a; line-height: 1.45; }
+    .ko { font-size: 0.85rem; color: #475569; margin-top: 4px; font-weight: 500; }
+    
+    .btn-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    button.toggle-btn { cursor: pointer; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 7px 10px; font-weight: bold; font-size: 0.82rem; background: white; color: #334155; }
+    button.ctrl-btn { cursor: pointer; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; font-size: 0.82rem; }
     .btn-play { background: #2563eb; color: white; }
+    .btn-play:hover { background: #1d4ed8; }
     .btn-stop { background: #ef4444; color: white; }
-    
-    .btn-review-toggle { background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; }
-    .btn-review-toggle.active { background: #ffe4e6; border-color: #f43f5e; color: #e11d48; font-weight: 800; }
-
-    .status-text { font-size: 0.78rem; color: #059669; font-weight: bold; min-width: 75px; text-align: right; }
-
-    /* [신규] 스크롤 고정 플로팅 직접입력 버튼 (좌측 하단) */
-    #floating-custom-btn {
-      position: fixed;
-      bottom: 22px;
-      left: 18px;
-      padding: 12px 18px;
-      border-radius: 30px;
-      background: #0f172a;
-      border: 2px solid #10b981;
-      color: #10b981;
-      font-size: 0.92rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-      cursor: pointer;
-      z-index: 99999;
-    }
-    #floating-custom-btn:active { transform: scale(0.93); }
-
-    /* 고정 플로팅 화면끄기(절전) 버튼 (우측 하단) */
-    #floating-lock-btn {
-      position: fixed;
-      bottom: 22px;
-      right: 18px;
-      padding: 12px 18px;
-      border-radius: 30px;
-      background: #0f172a;
-      border: 2px solid #38bdf8;
-      color: #38bdf8;
-      font-size: 0.92rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-      cursor: pointer;
-      z-index: 99999;
-    }
-    #floating-lock-btn:active { transform: scale(0.93); }
-
-    /* [신규] 나만의 문장 입력 팝업 모달 */
-    #custom-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.75);
-      z-index: 200000;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .modal-content {
-      background: white;
-      width: 100%;
-      max-width: 480px;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    }
-    .modal-title { font-size: 1.1rem; font-weight: bold; color: #0f172a; margin-bottom: 14px; }
-    .modal-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; margin-bottom: 10px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
-
-    /* OLED 순수 암전 화면 */
-    #dark-curtain {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #000000;
-      z-index: 1000000;
-      color: #10b981;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      user-select: none;
-      touch-action: none;
-    }
-    .dark-counter { font-size: 2.2rem; font-weight: 800; margin: 12px 0; color: #22c55e; }
-    .dark-msg { font-size: 0.85rem; color: #475569; text-align: center; line-height: 1.5; }
+    .btn-stop:hover { background: #dc2626; }
+    .status { font-size: 0.82rem; color: #059669; font-weight: bold; min-width: 85px; text-align: right; }
   </style>
 </head>
 <body>
 
-  <h2>🎙️ 컬컴 회화 (문장 직접입력 & 1,000회)</h2>
-  <div class="sub-title">좌측 하단 ✍️ 버튼으로 듣고 싶은 문장을 언제든 추가 반복</div>
+  <h2>🔥 영어회화 핵심 96패턴 (전수 교정 & 1,000회 반복 판)</h2>
+  <div class="sub-text">자연스러운 구어체 영한 매칭 / If 조건절 문두 정렬 / 남·여 음성 및 배속 원클릭 토글 / PiP 모드 지원</div>
 
-  <div class="course-wrap">
-    <button class="course-btn active" id="c1-btn" onclick="switchCourse(1)">📘 기초 1</button>
-    <button class="course-btn" id="c2-btn" onclick="switchCourse(2)">📙 기초 2</button>
-    <button class="course-btn review-tab" id="cr-btn" onclick="switchCourse('review')">⭐ 복습함 (<span id="rev-count">0</span>)</button>
+  <div class="course-tab-container">
+    <button class="course-btn active" id="cbtn-1" onclick="switchCourse(1)">📘 기초 1과정 (48패턴)</button>
+    <button class="course-btn" id="cbtn-2" onclick="switchCourse(2)">📙 기초 2과정 (48패턴)</button>
   </div>
 
-  <div class="day-wrap" id="day-selector-wrap">
+  <div class="day-tab-container">
     <button class="day-btn active" onclick="switchDay(1)">1일차 (1~12)</button>
     <button class="day-btn" onclick="switchDay(2)">2일차 (13~24)</button>
     <button class="day-btn" onclick="switchDay(3)">3일차 (25~36)</button>
     <button class="day-btn" onclick="switchDay(4)">4일차 (37~48)</button>
   </div>
 
-  <div id="card-list"></div>
-
-  <!-- [스크롤 고정 버튼 1] 나만의 문장 입력 버튼 -->
-  <div id="floating-custom-btn" onclick="openCustomModal()" title="새 문장 입력">
-    <span>✍️</span> <span>문장 입력</span>
-  </div>
-
-  <!-- [스크롤 고정 버튼 2] 화면 끄기 (절전) 버튼 -->
-  <div id="floating-lock-btn" onclick="activateLockScreen()" title="절전 화면 잠금">
-    <span>🔒</span> <span>화면끄기</span>
-  </div>
-
-  <!-- 나만의 문장 입력 팝업 모달 -->
-  <div id="custom-modal">
-    <div class="modal-content">
-      <div class="modal-title">✍️ 원하는 문장 즉시 1,000회 듣기</div>
-      <input type="text" id="custom-en" class="modal-input" placeholder="영어 문장 입력 (예: I love freediving.)" autofocus>
-      <input type="text" id="custom-ko" class="modal-input" placeholder="한글 번역 (선택 사항)">
-      
-      <div style="margin: 10px 0; font-size: 0.85rem; color: #475569;">
-        <label style="cursor: pointer;">
-          <input type="checkbox" id="save-to-review" checked> ⭐ 이 문장을 복습 보관함에도 저장하기
-        </label>
-      </div>
-
-      <div class="modal-actions">
-        <button class="ctrl-btn btn-ans" onclick="closeCustomModal()">취소</button>
-        <button class="ctrl-btn btn-play" onclick="playCustomSentence()">▶ 즉시 1000회 재생</button>
-      </div>
+  <div class="system-bar">
+    <span id="sys-status">엔진 로딩 중...</span>
+    <div class="system-controls">
+      <label style="font-weight: bold; color: #0f172a;">반복 횟수: 
+        <select id="repeat-select" style="padding: 4px 6px; border-radius: 4px; font-weight: bold;">
+          <option value="10">10회</option>
+          <option value="50">50회</option>
+          <option value="100" selected>100회</option>
+          <option value="300">300회</option>
+          <option value="500">500회</option>
+          <option value="1000">1000회 (무한 장착)</option>
+        </select>
+      </label>
+      <button class="btn-pip" onclick="togglePiP()">📺 화면 팝업(PiP)</button>
     </div>
   </div>
 
-  <!-- OLED 절전 커튼 -->
-  <div id="dark-curtain" onclick="handleCurtainTap()">
-    <div style="font-size: 0.95rem; color: #64748b; padding: 0 20px; text-align: center;" id="dark-text">재생 대기 중...</div>
-    <div class="dark-counter" id="dark-count">0 / 1000</div>
-    <div class="dark-msg">화면이 절전 상태입니다.<br>화면을 빠르게 <b>두 번(더블 탭)</b> 두드리면 복귀합니다.</div>
-  </div>
+  <canvas id="pip-canvas" width="400" height="250"></canvas>
+  <video id="pip-video" playsinline muted autoplay></video>
+
+  <div id="player-body"></div>
 
   <script>
-    const dataset = {
+    const database = {
       1: {
         1: [
-          { pattern: "1. Can you + 동사 ~?", sentences: [{ en: "Can you spot me on the bench press for my last set?", ko: "벤치프레스 마지막 세트 보조 좀 해줄 수 있어?" }, { en: "Can you pass me that bottle of water?", ko: "거기 있는 물병 좀 건네줄 수 있어?" }] },
-          { pattern: "2. I'd like to + 동사", sentences: [{ en: "I would like to order an iced Americano with an extra shot.", ko: "아이스 아메리카노 샷 추가해서 주문할게요." }, { en: "I would like to practice my breath hold in the deep pool today.", ko: "오늘 잠수풀에서 숨 참기 훈련을 좀 하고 싶습니다." }] },
-          { pattern: "3. I think / I don't think", sentences: [{ en: "I think doing squats before lunges gives me a better pump.", ko: "런지 전에 스쿼트를 먼저 하는 게 자극이 더 잘 오는 것 같아." }, { en: "I do not think eating high carbs tonight is a good idea for my cut.", ko: "체지방 감량 중인데 오늘 밤 고탄수화물을 먹는 건 별로인 것 같아." }] },
-          { pattern: "4. I didn't / I wasn't", sentences: [{ en: "I did not check the grocery list before heading to Traders.", ko: "트레이더스 가기 전에 장보기 목록을 확인 안 했네." }, { en: "I was not exhausted even after doing five kilometers on the treadmill.", ko: "트레드밀에서 5킬로를 뛰고 났는데도 전혀 지치지 않았어." }] },
-          { pattern: "5. How about + 명사 / ing", sentences: [{ en: "How about grabbing a quick meal at the company cafeteria?", ko: "구내식당에서 간단하게 밥 먹는 건 어때?" }, { en: "How about going for an outdoor run along the park tonight?", ko: "오늘 밤 공원 따라서 야외 러닝 한 바퀴 뛰는 건 어때?" }] },
-          { pattern: "6. Would you please + 동사", sentences: [{ en: "Would you please wipe down the bench after your workout?", ko: "운동 끝나고 벤치 땀 좀 닦아주시겠어요?" }, { en: "Would you please let me know when the laundry finishes?", ko: "세탁기 다 돌아가면 저한테 좀 알려주실래요?" }] },
-          { pattern: "7. What is your + 명사", sentences: [{ en: "What is your main workout split for this week?", ko: "이번 주 운동 분할 루틴이 어떻게 돼?" }, { en: "What is your static apnea personal record in freediving?", ko: "프리다이빙 스태틱(숨 참기) 최고 기록이 몇 분이야?" }] },
-          { pattern: "8. Let's + 동사", sentences: [{ en: "Let us hit the gym early tomorrow for our upper body routine.", ko: "내일 일찍 헬스장 가서 상체 루틴 끝내버리자." }, { en: "Let us stop by Traders to stock up on chicken breast.", ko: "닭가슴살 쟁여두게 트레이더스 잠깐 들르자." }] },
-          { pattern: "9. There is / are + 명사", sentences: [{ en: "There is plenty of protein powder left in my studio apartment.", ko: "오피스텔에 단백질 보충제 아직 넉넉하게 남아있어." }, { en: "There are two English conversation cafe sessions this week.", ko: "이번 주에 영어회화 카페 세션이 2회 잡혀 있어." }] },
-          { pattern: "10. Thank you for ~", sentences: [{ en: "Thank you for checking my swimming form today.", ko: "오늘 제 수영 자세 봐주셔서 감사합니다." }, { en: "Thank you for sharing your low carb recipe with me.", ko: "저탄수화물 레시피 공유해줘서 고마워." }] },
-          { pattern: "11. It seems + 형용사 / that ~", sentences: [{ en: "It seems easy to maintain my two day workout split.", ko: "상하체 2분할 루틴을 유지하는 건 꽤 할 만해 보여." }, { en: "It seems that the road is clear for our road trip.", ko: "부모님 댁 가는 도로가 막히지 않는 것 같아 보여." }] },
-          { pattern: "12. I am going to + 동사", sentences: [{ en: "I am going to take a cold shower right after this workout.", ko: "이 운동 끝나자마자 바로 찬물로 샤워할 생각이야." }, { en: "I am going to prep clean ingredients for dinner tonight.", ko: "오늘 저녁에 해 먹을 깔끔한 요리 재료들을 준비할 거야." }] }
+          { pattern: "1. Can you + 동사 ~?", sentences: [
+            { en: "Can you give me a hand with this for a second?", ko: "이것 좀 잠깐 도와줄 수 있어?" },
+            { en: "Can you check if there are any open spots left?", ko: "남은 자리가 있는지 확인해 줄 수 있어?" }
+          ]},
+          { pattern: "2. I'd like to + 동사", sentences: [
+            { en: "I'd like to make a reservation for two tomorrow evening.", ko: "내일 저녁 2명 예약하고 싶습니다." },
+            { en: "I'd like to point out one thing before we move on.", ko: "다음으로 넘어가기 전에 한 가지 짚고 넘어가고 싶습니다." }
+          ]},
+          { pattern: "3. I think / I don't think + 주어 + 동사", sentences: [
+            { en: "I think we should stick to the original plan.", ko: "내 생각엔 원래 계획대로 가는 게 좋을 것 같아." },
+            { en: "I don't think this is going to work out in the long run.", ko: "장기적으로 봤을 때 이건 잘 안 풀릴 것 같아." }
+          ]},
+          { pattern: "4. I didn't + 동사 / I wasn't + 형용사", sentences: [
+            { en: "I didn't expect the traffic to be this heavy.", ko: "차가 이렇게 밀릴 줄은 몰랐어." },
+            { en: "I didn't know the schedule had changed.", ko: "일정이 바뀐 줄 전혀 모르고 있었어." }
+          ]},
+          { pattern: "5. How about + 명사 / ing", sentences: [
+            { en: "How about taking a quick break before the next session?", ko: "다음 세션 전에 잠깐 쉬는 건 어때?" },
+            { en: "How about Friday afternoon instead of Thursday?", ko: "목요일 대신 금요일 오후는 어때?" }
+          ]},
+          { pattern: "6. Would you please + 동사", sentences: [
+            { en: "Would you please send me the updated details by email?", ko: "업데이트된 세부 정보를 이메일로 보내주시겠어요?" },
+            { en: "Would you please keep it down a bit?", ko: "소리를 조금만 낮춰주시겠어요?" }
+          ]},
+          { pattern: "7. What is your + 명사", sentences: [
+            { en: "What is your honest opinion on this approach?", ko: "이 방식에 대한 솔직한 의견이 어때?" },
+            { en: "What is your top priority for this month?", ko: "이번 달 가장 우선순위가 높은 일이 뭐야?" }
+          ]},
+          { pattern: "8. Let's + 동사", sentences: [
+            { en: "Let's keep things simple and focus on what matters.", ko: "단순하게 생각하고 중요한 것에만 집중하자." },
+            { en: "Let's wrap this up before it gets too late.", ko: "더 늦어지기 전에 슬슬 마무리하자." }
+          ]},
+          { pattern: "9. There is / are + 명사", sentences: [
+            { en: "There is plenty of room for improvement.", ko: "아직 더 개선할 여지가 충분히 많아." },
+            { en: "There are a few critical points we need to go over.", ko: "우리가 짚고 넘어가야 할 몇 가지 중요한 포인트가 있어." }
+          ]},
+          { pattern: "10. Thank you for ~", sentences: [
+            { en: "Thank you for your quick feedback on the draft.", ko: "초안에 대해 빠르게 피드백을 줘서 고마워." },
+            { en: "Thank you for being so patient with me.", ko: "차분하게 기다려줘서 고마워." }
+          ]},
+          { pattern: "11. It seems + 형용사 / that ~", sentences: [
+            { en: "It seems reasonable to give it another shot.", ko: "한 번 더 시도해보는 게 합리적인 것 같아." },
+            { en: "It seems they haven't made up their mind yet.", ko: "그들이 아직 결정을 내리지 못한 것 같아 보여." }
+          ]},
+          { pattern: "12. I am going to + 동사", sentences: [
+            { en: "I'm going to get some solid training in this morning.", ko: "오늘 아침에 제대로 운동 한 판 뛸 생각이야." },
+            { en: "I'm going to cut back on unnecessary expenses starting next week.", ko: "다음 주부터는 불필요한 지출을 줄일 계획이야." }
+          ]}
         ],
         2: [
-          { pattern: "13. I like ~ing", sentences: [{ en: "I like running outside on breezy summer evenings.", ko: "나는 선선한 여름 저녁에 밖에서 러닝하는 걸 좋아해." }, { en: "I like studying Chinese right after my English study session.", ko: "나는 영어 공부 끝나고 바로 중국어 회화 공부하는 걸 좋아해." }] },
-          { pattern: "14. I am sorry that ~", sentences: [{ en: "I am sorry that I missed the early morning gym session.", ko: "아침 헬스장 모임에 빠져서 미안해." }, { en: "I am sorry that I forgot to turn off the washing machine.", ko: "세탁기를 끄는 걸 깜빡해서 죄송합니다." }] },
-          { pattern: "15. I am sorry about ~", sentences: [{ en: "I am sorry about rescheduling our English study meet-up.", ko: "영어 스터디 일정을 변경하게 되어 미안해." }, { en: "I am sorry about the sudden traffic on my way to work.", ko: "출근길 도로가 갑자기 막혀서 늦어 유감입니다." }] },
-          { pattern: "16. I have [명사] to [동사]", sentences: [{ en: "I have a few fresh vegetables to prep for dinner.", ko: "저녁 요리에 쓸 신선한 채소들을 손질해야 해." }, { en: "I have some important Chinese vocabulary to review tonight.", ko: "오늘 밤에 복습해야 할 중요한 중국어 단어들이 있어." }] },
-          { pattern: "17. She said that ~", sentences: [{ en: "She said that the deep diving pool closes at nine tonight.", ko: "그녀가 오늘 잠수풀 밤 9시에 문 닫는다고 말했어." }, { en: "She said that staying hydrated helps reduce muscle soreness.", ko: "그녀가 수분을 충분히 섭취하면 근육통 줄이는 데 도움이 된다고 했어." }] },
-          { pattern: "18. I have to / should ~", sentences: [{ en: "I have to wash my gym clothes before heading to bed.", ko: "자기 전에 운동복 빨래를 꼭 돌려야 해." }, { en: "I should drink an iced coffee to stay alert this afternoon.", ko: "오후에 집중하려면 아이스 아메리카노 한잔 마셔야겠어." }] },
-          { pattern: "19. Sure, I can ~", sentences: [{ en: "Sure, I can give you a quick ride to the diving pool.", ko: "물론이지, 다이빙 풀장까지 차로 태워다 줄 수 있어." }, { en: "Sure, I can recommend some great local spots in Thailand.", ko: "물론이죠, 지난달 다녀온 태국 로컬 명소 몇 군데 추천해 드릴게요." }] },
-          { pattern: "20. I feel like ~", sentences: [{ en: "I feel like doing some heavy leg presses today.", ko: "오늘따라 고중량 레그프레스가 땡기네." }, { en: "I feel like taking a slow walk around the park after dinner.", ko: "저녁 먹고 공원 한 바퀴 천천히 산책하고 싶은 기분이야." }] },
-          { pattern: "21. [문장] + to [동사] (목적)", sentences: [{ en: "I woke up early to finish my morning cardio workout.", ko: "아침 유산소 운동을 끝내려고 일찍 일어났어." }, { en: "I drove to the supermarket to get bulk ingredients.", ko: "대용량 식재료를 사려고 대형 마트로 운전해 갔어." }] },
-          { pattern: "22. 접속사 활용", sentences: [{ en: "I love freediving, but I need to practice my equalization more.", ko: "프리다이빙을 정말 좋아하지만 이퀄라이징 연습을 더 해야 해." }, { en: "I prefer eating at home because I can strictly control my carbs.", ko: "탄수화물을 철저히 조절할 수 있어서 집밥을 선호해." }] },
-          { pattern: "23. I think you should ~", sentences: [{ en: "I think you should warm up your shoulders before benching.", ko: "벤치프레스 들어가기 전에 어깨 워밍업부터 하는 게 좋을 것 같아." }, { en: "I think you should visit Thailand during the dry season.", ko: "태국 여행은 건기 시즌에 맞춰서 가는 걸 추천해." }] },
-          { pattern: "24. Do you want to ~", sentences: [{ en: "Do you want to practice English conversation with me today?", ko: "오늘 나랑 영어회화 카페 가서 프리토킹 연습할래?" }, { en: "Do you want to grab lunch at the cafeteria together?", ko: "구내식당 가서 같이 점심 먹을래?" }] }
+          { pattern: "13. I like ~ing", sentences: [
+            { en: "I like working out early in the morning before everyone wakes up.", ko: "나는 다들 일어나기 전 이른 아침에 운동하는 걸 좋아해." },
+            { en: "I like exploring quiet local cafes whenever I travel.", ko: "나는 여행 갈 때마다 조용한 로컬 카페를 찾아다니는 걸 좋아해." }
+          ]},
+          { pattern: "14. I am sorry that ~", sentences: [
+            { en: "I'm sorry that I kept you waiting for so long.", ko: "너무 오래 기다리게 해서 정말 죄송합니다." },
+            { en: "I'm sorry that things didn't go as planned today.", ko: "오늘 일들이 계획대로 풀리지 않아서 안타깝네." }
+          ]},
+          { pattern: "15. I am sorry about ~", sentences: [
+            { en: "I'm sorry about the sudden change in schedule.", ko: "일정이 갑자기 변경되어 죄송합니다." },
+            { en: "I'm sorry about the mess in the conference room.", ko: "회의실이 지저분해서 미안해." }
+          ]},
+          { pattern: "16. I have [명사] to [동사]", sentences: [
+            { en: "I have a lot of urgent tasks to handle before noon.", ko: "정오 전에 처리해야 할 급한 업무들이 많아." },
+            { en: "I have a couple of questions to ask regarding the contract.", ko: "계약서 관련해서 여쭤볼 질문이 두어 개 있습니다." }
+          ]},
+          { pattern: "17. She said that ~", sentences: [
+            { en: "She said that the delivery would arrive by five this afternoon.", ko: "그녀가 오늘 오후 5시까지는 배송이 도착할 거라고 했어." },
+            { en: "She said that we need to double check the reservation date.", ko: "그녀가 예약 날짜를 다시 한번 더블 체크해야 한다고 했어." }
+          ]},
+          { pattern: "18. I have to / should ~", sentences: [
+            { en: "I have to leave right now to catch the train on time.", ko: "기차를 제시간에 타려면 지금 당장 출발해야 해." },
+            { en: "I should pay closer attention to the fine print.", ko: "계약서의 세부 사항에 더 주의를 기울여야겠어." }
+          ]},
+          { pattern: "19. Sure, I can ~", sentences: [
+            { en: "Sure, I can give you a quick ride to the station.", ko: "물론이지, 역까지 잠깐 태워다 줄 수 있어." },
+            { en: "Sure, I can send you the file as soon as I get to the office.", ko: "물론이죠, 사무실 도착하자마자 파일 바로 보내드릴게요." }
+          ]},
+          { pattern: "20. I feel like ~", sentences: [
+            { en: "I feel like eating something clean and refreshing today.", ko: "오늘따라 깔끔하고 담백한 음식이 당기네." },
+            { en: "I feel like we are finally moving in the right direction.", ko: "우리가 드디어 올바른 방향으로 나아가고 있는 느낌이 들어." }
+          ]},
+          { pattern: "21. [문장] + to [동사] (목적/결과)", sentences: [
+            { en: "I took a few days off to clear my head completely.", ko: "머리를 완전히 식히기 위해 며칠 휴가를 냈어." },
+            { en: "He called me directly to confirm the final headcount.", ko: "그가 최종 인원을 확인하려고 나한테 직접 전화를 했어." }
+          ]},
+          { pattern: "22. 접속사 활용 (and, or, so, but, because)", sentences: [
+            { en: "I wanted to join the session, but my schedule was completely packed.", ko: "세션에 참여하고 싶었지만 일정이 꽉 차 있었어." },
+            { en: "Because safety always comes first, let's double check the gear now.", ko: "안전이 최우선이니까, 지금 바로 장비를 다시 점검하자." }
+          ]},
+          { pattern: "23. I think you should ~", sentences: [
+            { en: "I think you should get a second opinion before making a decision.", ko: "결정하기 전에 다른 전문가의 의견도 들어보는 게 좋을 것 같아." },
+            { en: "I think you should take it easy and recover first.", ko: "무리하지 말고 일단 푹 쉬면서 몸부터 회복하는 게 좋겠어." }
+          ]},
+          { pattern: "24. Do you want to ~", sentences: [
+            { en: "Do you want to grab a quick coffee with me?", ko: "나랑 커피 한잔 가볍게 할래?" },
+            { en: "Do you want to join our swimming session this weekend?", ko: "이번 주말 우리 수영 훈련에 같이 갈래?" }
+          ]}
         ],
         3: [
-          { pattern: "25. I'm trying to ~", sentences: [{ en: "I am trying to maintain my body fat percentage below twelve.", ko: "체지방률을 12퍼센트 이하로 유지하려고 노력 중이야." }, { en: "I am trying to speak only English for two hours straight.", ko: "두 시간 동안 연속으로 영어로만 말해보려고 시도 중이야." }] },
-          { pattern: "26. Why don't we ~", sentences: [{ en: "Why do not we hit the treadmill for twenty minutes?", ko: "트레드밀 20분만 뛰고 마무리하는 건 어때?" }, { en: "Why do not we visit my parents this coming weekend?", ko: "이번 주말에 우리 부모님 댁에 다녀오는 건 어때?" }] },
-          { pattern: "27. What can I ~", sentences: [{ en: "What can I substitute for carbs in my daily diet?", ko: "매일 먹는 식단에서 탄수화물 대신 뭘 챙겨 먹으면 좋을까?" }, { en: "What can I do to extend my breath hold underwater?", ko: "물속에서 숨을 더 오래 참으려면 무엇을 훈련해야 할까?" }] },
-          { pattern: "28. What kind of [명사] do you ~?", sentences: [{ en: "What kind of split routine do you follow at the gym?", ko: "헬스장에서 주로 몇 분할 루틴으로 운동하세요?" }, { en: "What kind of coffee beans do you prefer for iced coffee?", ko: "아이스 아메리카노 마실 때 어떤 원두를 선호하세요?" }] },
-          { pattern: "29. Where / When / What did you ~?", sentences: [{ en: "Where did you buy those custom freediving fins?", ko: "그 프리다이빙 롱핀 어디서 맞추셨어요?" }, { en: "When did you get back from your trip to Thailand?", ko: "지난달 태국 여행에서는 언제 귀국하셨어요?" }] },
-          { pattern: "30. That's why ~", sentences: [{ en: "That is why I drink plenty of water during workouts.", ko: "그렇기 때문에 내가 운동 중에 물을 자주 마시는 거야." }, { en: "That is exactly what I discussed at the English cafe.", ko: "그게 바로 어제 영어회화 카페에서 나눴던 이야기야." }] },
-          { pattern: "31. Have you ever ~?", sentences: [{ en: "Have you ever swum in the open sea without a life vest?", ko: "구명조끼 없이 오픈워터 바다 수영해 본 적 있어?" }, { en: "Have you ever followed a strict zero carb diet?", ko: "철저한 무탄수화물 식단을 실천해 본 적 있어?" }] },
-          { pattern: "32. I've been + ~ing", sentences: [{ en: "I have been working out four times a week consistently.", ko: "일주일에 네 번씩 꾸준히 헬스장에 나가 운동하고 있어." }, { en: "I have been learning conversational Chinese on YouTube.", ko: "유튜브를 보면서 기초 중국어 회화를 공부해오고 있어." }] },
-          { pattern: "33. Will you ~?", sentences: [{ en: "Will you check my diving posture when I go down?", ko: "내가 하강할 때 다이빙 자세 좀 봐줄래?" }, { en: "Will you drop me off at the gym on your way home?", ko: "집에 가는 길에 나 헬스장 앞에 잠깐 내려줄 수 있어?" }] },
-          { pattern: "34. Do you ever ~?", sentences: [{ en: "Do you ever get tired of eating chicken breast every day?", ko: "매일 닭가슴살 챙겨 먹는 거 질릴 때 없어?" }, { en: "Do you ever listen to English podcasts while driving?", ko: "운전할 때 영어 팟캐스트 틀어놓고 들을 때 있어?" }] },
-          { pattern: "35. How often do you ~?", sentences: [{ en: "How often do you go to the English conversation cafe?", ko: "영어회화 카페는 일주일에 얼마나 자주 가세요?" }, { en: "How often do you do your laundry in your apartment?", ko: "오피스텔에서 빨래는 며칠에 한 번씩 돌리시나요?" }] },
-          { pattern: "36. I hope to ~", sentences: [{ en: "I hope to dive twenty meters deep without any stress.", ko: "이퀄라이징 압박감 없이 수심 20미터를 편하게 내려가고 싶어." }, { en: "I hope to visit Thailand again for another diving trip.", ko: "다이빙 투어를 하러 태국에 꼭 한 번 다시 가고 싶네." }] }
+          { pattern: "25. I'm trying to ~", sentences: [
+            { en: "I'm trying to build a consistent morning routine.", ko: "흐트러짐 없는 아침 루틴을 만들려고 노력 중이야." },
+            { en: "I'm trying to figure out what went wrong with the system.", ko: "시스템에 무엇이 문제였는지 원인을 파악해보려는 중이야." }
+          ]},
+          { pattern: "26. Why don't we ~", sentences: [
+            { en: "Why don't we meet a bit earlier to avoid the rush?", ko: "혼잡한 시간을 피해서 조금 일찍 만나는 건 어때?" },
+            { en: "Why don't we go over the contract together one more time?", ko: "계약서를 같이 한 번 더 꼼꼼히 검토해보는 건 어때요?" }
+          ]},
+          { pattern: "27. What can I ~", sentences: [
+            { en: "What can I do to help you get this done faster?", ko: "이 일을 더 빨리 끝내려면 내가 뭘 도와주면 될까?" },
+            { en: "What can I get for you to drink while we wait?", ko: "기다리는 동안 마실 것 좀 뭐 갖다 드릴까요?" }
+          ]},
+          { pattern: "28. What kind of [명사] do you ~?", sentences: [
+            { en: "What kind of training routine do you usually follow?", ko: "평소에 주로 어떤 방식의 운동 루틴을 하세요?" },
+            { en: "What kind of accommodation are you looking for during this trip?", ko: "이번 여행에서 어떤 스타일의 숙소를 찾고 계신가요?" }
+          ]},
+          { pattern: "29. Where / When / What did you ~?", sentences: [
+            { en: "Where did you get that custom gear from?", ko: "그 맞춤 장비는 어디서 구하셨어요?" },
+            { en: "When did you first start learning freediving?", ko: "프리다이빙은 처음에 언제 시작하셨어요?" }
+          ]},
+          { pattern: "30. That's what ~ / That's why ~", sentences: [
+            { en: "That is exactly what I was trying to explain earlier.", ko: "그게 바로 내가 아까 설명하려고 했던 핵심이야." },
+            { en: "That's why we need to double check everything in advance.", ko: "그렇기 때문에 우리가 사전에 모든 걸 미리 확인해야 하는 거야." }
+          ]},
+          { pattern: "31. Have you ever ~?", sentences: [
+            { en: "Have you ever tried open water swimming in the sea?", ko: "바다에서 오픈워터 수영해 본 적 있어?" },
+            { en: "Have you ever experienced equalization problems when diving?", ko: "다이빙할 때 이퀄라이징 문제가 생긴 적 있었어?" }
+          ]},
+          { pattern: "32. I've been + ~ing", sentences: [
+            { en: "I've been practicing my breath hold every single day.", ko: "매일매일 숨 참기 훈련을 꾸준히 연습해 오고 있어." },
+            { en: "I've been working on this new project for three months.", ko: "석 달 동안 이 새로운 프로젝트에 매달려 왔어." }
+          ]},
+          { pattern: "33. Will you ~?", sentences: [
+            { en: "Will you be able to attend the meeting this afternoon?", ko: "오늘 오후 회의에 참석하실 수 있으신가요?" },
+            { en: "Will you let me know as soon as the package arrives?", ko: "택배 도착하는 즉시 나한테 알려줄래?" }
+          ]},
+          { pattern: "34. Do you ever ~?", sentences: [
+            { en: "Do you ever get nervous before a big competition?", ko: "큰 시합이나 경기 전에 긴장되는 적 있어?" },
+            { en: "Do you ever think about starting your own business?", ko: "너만의 사업을 시작해 볼 생각 해본 적 있어?" }
+          ]},
+          { pattern: "35. How often do you ~?", sentences: [
+            { en: "How often do you go swimming during the weekdays?", ko: "평일에는 얼마나 자주 수영하러 가세요?" },
+            { en: "How often do you inspect your car maintenance?", ko: "차량 정비 점검은 얼마나 자주 받으시나요?" }
+          ]},
+          { pattern: "36. I hope to ~", sentences: [
+            { en: "I hope to get my instructor certificate by next year.", ko: "내년까지는 강사 자격증을 꼭 취득하고 싶어." },
+            { en: "I hope to see some positive results soon.", ko: "곧 긍정적인 결과가 나오기를 기대합니다." }
+          ]}
         ],
         4: [
-          { pattern: "37. I agree with / that", sentences: [{ en: "I agree that progressive overload is essential for muscle growth.", ko: "근성장을 위해서는 점진적 과부하가 필수적이라는 점에 동의해." }, { en: "I agree with your opinion on keeping a clean low carb diet.", ko: "클린한 저탄수화물 식단을 유지하자는 네 의견에 전적으로 동의해." }] },
-          { pattern: "38. I'm upset ~", sentences: [{ en: "I am upset that the fitness center was closed for maintenance.", ko: "헬스장이 내부 공사로 문을 닫아서 정말 아쉬웠어." }, { en: "I am upset about losing my favorite diving snorkel.", ko: "아끼던 프리다이빙 스노클을 잃어버려서 속상해." }] },
-          { pattern: "39. When I ~", sentences: [{ en: "When I finish my morning shower, I feel completely energized.", ko: "아침 샤워를 끝내고 나면 온몸에 에너지가 제대로 돌아." }, { en: "When I hit the gym four times a week, my stamina improves.", ko: "주 4회 헬스장에 나가면 확실히 체력이 붙어." }] },
-          { pattern: "40. If I ~", sentences: [{ en: "If I finish work early, I will go for an outdoor run.", ko: "일이 일찍 끝나면 야외 러닝을 뛰러 갈 거야." }, { en: "If I find good beef on sale at Traders, I will stock up.", ko: "트레이더스에서 소고기 할인하면 잔뜩 쟁여둘 거야." }] },
-          { pattern: "41. I would ~", sentences: [{ en: "I would choose iced Americano over any sweet drink.", ko: "나는 달달한 음료보다는 무조건 아이스 아메리카노를 고르겠어." }, { en: "I would love to practice diving in tropical waters again.", ko: "동남아 따뜻한 바다에서 다시 한번 프리다이빙을 즐기고 싶어." }] },
-          { pattern: "42. It's time to ~", sentences: [{ en: "It is time to start my lower body training session.", ko: "이제 하체 운동 세션을 시작해야 할 시간이야." }, { en: "It is time to take my daily supplements and clean proteins.", ko: "영양제와 단백질 식단을 챙겨 먹어야 할 시간이야." }] },
-          { pattern: "43. I'm okay with ~", sentences: [{ en: "I am okay with having a simple meal at the cafeteria.", ko: "구내식당에서 간단하게 식사 해결해도 난 완전 괜찮아." }, { en: "I am okay with running on the treadmill instead of outdoors.", ko: "야외 대신 실내 트레드밀에서 뛰어도 난 전혀 상관없어." }] },
-          { pattern: "44. Let me ~", sentences: [{ en: "Let me show you how to equalize your ears underwater.", ko: "물속에서 귀 이퀄라이징 어떻게 하는지 내가 보여줄게." }, { en: "Let me check the expiration date on these groceries first.", ko: "이 식재료들 유통기한부터 내가 먼저 확인할게." }] },
-          { pattern: "45. How could you ~?", sentences: [{ en: "How could you finish that intense leg workout so quickly?", ko: "어떻게 그 빡센 하체 루틴을 그렇게 금방 끝낸 거야?" }, { en: "How could you hold your breath for over three minutes?", ko: "어떻게 숨을 3분이 넘게 참을 수 있는 거야?" }] },
-          { pattern: "46. I'm getting ~", sentences: [{ en: "I am getting used to this high protein, low carb lifestyle.", ko: "이 고단백 저탄수화물 라이프스타일에 점점 익숙해지고 있어." }, { en: "I am getting better at speaking natural English in conversations.", ko: "대화할 때 자연스럽게 영어를 구사하는 능력이 점점 늘고 있어." }] },
-          { pattern: "47. Are you done with ~?", sentences: [{ en: "Are you done with the leg press machine over there?", ko: "저기 레그프레스 머신 사용 다 끝나셨나요?" }, { en: "Are you done with your morning walk in the park?", ko: "공원 아침 산책은 벌써 다 끝낸 거야?" }] },
-          { pattern: "48. I am done with ~", sentences: [{ en: "I am done with my four day workout routine for the week.", ko: "이번 주 주 4회 분할 운동 루틴을 전부 마쳤어." }, { en: "I am done with prepping my meals for the next three days.", ko: "앞으로 3일 동안 먹을 도시락 식단 준비를 끝냈어." }] }
+          { pattern: "37. I agree with ~ / I agree that ~", sentences: [
+            { en: "I agree with your suggestion to simplify the process.", ko: "절차를 단순화하자는 당신의 제안에 동의합니다." },
+            { en: "I agree that we need a more aggressive marketing strategy.", ko: "우리가 더 적극적인 마케팅 전략을 세워야 한다는 점에 전적으로 동의해." }
+          ]},
+          { pattern: "38. I'm upset ~", sentences: [
+            { en: "I'm upset that the contractor missed the deadline again.", ko: "시공업체가 또 마감일을 어겨서 정말 화가 나." },
+            { en: "I'm upset about the lack of communication from their team.", ko: "그쪽 팀의 소통 부족 때문에 기분이 많이 상했어." }
+          ]},
+          { pattern: "39. When I ~", sentences: [
+            { en: "When I feel exhausted, a solid workout always recharges my energy.", ko: "지치고 피곤할 때 제대로 운동 한 판 뛰면 활력이 다시 돌아와." },
+            { en: "When I first moved to this area, everything felt completely new.", ko: "이 동네로 처음 이사 왔을 땐 모든 게 완전히 낯설었어." }
+          ]},
+          { pattern: "40. If I ~", sentences: [
+            { en: "If I find a better location, I will let you know immediately.", ko: "더 좋은 자리를 찾으면 너한테 바로 알려줄게." },
+            { en: "If I had more spare time, I would spend the whole month diving.", ko: "시간 여유만 더 있다면 한 달 내내 다이빙만 하면서 보내고 싶네." }
+          ]},
+          { pattern: "41. I would ~", sentences: [
+            { en: "I would definitely recommend this retreat program to anyone.", ko: "누구에게든 이 리트릿 프로그램을 진심으로 추천하고 싶어." },
+            { en: "If it were me, I would handle this issue in a completely different way.", ko: "나였다면 이 문제를 완전히 다른 방식으로 처리했을 거야." }
+          ]},
+          { pattern: "42. It's time to ~", sentences: [
+            { en: "It's time to make a solid decision and take action.", ko: "이제 확실하게 결정을 내리고 행동에 옮겨야 할 때야." },
+            { en: "It's time to replace the old equipment with a new model.", ko: "오래된 장비를 신형 모델로 교체할 때가 되었어." }
+          ]},
+          { pattern: "43. I'm okay with ~", sentences: [
+            { en: "I'm okay with any venue as long as parking is easy.", ko: "주차만 편하다면 모임 장소는 어디든 상관없어." },
+            { en: "I'm okay with rescheduling the meeting to next Monday.", ko: "회의를 다음 주 월요일로 미뤄도 저는 괜찮습니다." }
+          ]},
+          { pattern: "44. Let me ~", sentences: [
+            { en: "Let me check the exact price and get back to you in five minutes.", ko: "정확한 견적을 확인하고 5분 안에 다시 연락드릴게요." },
+            { en: "Let me show you a much more efficient technique.", ko: "훨씬 더 효율적인 자세와 테크닉을 보여줄게." }
+          ]},
+          { pattern: "45. How could you ~?", sentences: [
+            { en: "How could you manage to finish all of this in just one day?", ko: "어떻게 이 모든 걸 단 하루 만에 끝낼 수 있었던 거야?" },
+            { en: "How could you forget such an important detail?", ko: "어떻게 그렇게 중요한 세부 사항을 잊어버릴 수가 있어?" }
+          ]},
+          { pattern: "46. I'm getting ~", sentences: [
+            { en: "I'm getting much better at controlling my breath under pressure.", ko: "압박 속에서도 호흡을 조절하는 능력이 훨씬 좋아지고 있어." },
+            { en: "I'm getting used to this intense daily schedule.", ko: "이 빡빡한 일상 스케줄에 점점 익숙해지고 있어." }
+          ]},
+          { pattern: "47. Are you done with ~?", sentences: [
+            { en: "Are you done with the financial review document?", ko: "재무 검토 서류 작업은 다 끝나셨나요?" },
+            { en: "Are you done with your morning workout already?", ko: "벌써 아침 운동 다 끝낸 거야?" }
+          ]},
+          { pattern: "48. I am done with ~", sentences: [
+            { en: "I'm done with the first draft, so feel free to review it.", ko: "초안 작성이 끝났으니 편하게 검토해 보세요." },
+            { en: "I'm completely done with this toxic environment.", ko: "이런 소모적인 환경은 이제 완전히 정리할 생각이야." }
+          ]}
         ]
       },
       2: {
         1: [
-          { pattern: "1. be supposed to", sentences: [{ en: "I am supposed to hit the gym for leg day this evening.", ko: "오늘 저녁에 헬스장 가서 하체 운동하기로 되어 있어." }, { en: "We are supposed to meet at the English cafe at two.", ko: "우리는 오후 2시에 영어회화 카페에서 만나기로 되어 있어." }] },
-          { pattern: "2. I want you to", sentences: [{ en: "I want you to check my squat depth during this set.", ko: "이번 세트 때 내 스쿼트 깊이 좀 체크해 줬으면 좋겠어." }, { en: "I want you to try this low carb chicken recipe.", ko: "내가 만든 이 저탄수화물 닭가슴살 요리 한번 먹어봐." }] },
-          { pattern: "3. Why do you", sentences: [{ en: "Why do you always drink iced Americano even in winter?", ko: "너는 왜 한겨울에도 항상 아이스 아메리카노만 마셔?" }, { en: "Why do you prefer a two day split over a three day split?", ko: "너는 왜 3분할보다 2분할 운동 루틴을 더 선호해?" }] },
-          { pattern: "4. too 형용사 to 동사", sentences: [{ en: "My legs are too sore to run on the treadmill today.", ko: "하체 근육통이 너무 심해서 오늘은 트레드밀을 도저히 못 뛰겠어." }, { en: "The diving gear was too heavy to carry on my own.", ko: "다이빙 장비가 혼자 들고 이동하기에는 너무 무거웠어." }] },
-          { pattern: "5. 관계대명사", sentences: [{ en: "This is the studio apartment that I moved into recently.", ko: "여기가 내가 최근에 이사 온 오피스텔이야." }, { en: "I met a freediving instructor who trained in Thailand.", ko: "태국에서 훈련을 받고 온 프리다이빙 강사를 만났어." }] },
-          { pattern: "6. I'm worried about / that", sentences: [{ en: "I am worried about losing my muscle mass while cutting.", ko: "체지방 감량하다가 근손실이 올까 봐 걱정돼." }, { en: "I am worried that the road to my parents' house will be packed.", ko: "부모님 댁 가는 고속도로가 꽉 막힐까 봐 걱정이야." }] },
-          { pattern: "7. I'm afraid of / that", sentences: [{ en: "I am afraid of getting ear squeeze when diving deep.", ko: "깊은 수심으로 다이빙할 때 귀 압착이 올까 봐 두려워." }, { en: "I am afraid that I might skip my workout tomorrow.", ko: "내일 운동을 빼먹게 될까 봐 은근히 걱정되네." }] },
-          { pattern: "8. I'm heading to", sentences: [{ en: "I am heading to Traders to buy some bulk beef.", ko: "대용량 소고기 좀 사러 트레이더스로 향하는 중이야." }, { en: "I am heading to the office cafeteria to grab a quick lunch.", ko: "간단하게 점심 먹으려고 구내식당으로 가는 길이야." }] },
-          { pattern: "9. I'm on one's way", sentences: [{ en: "I am on my way to the English conversation cafe now.", ko: "지금 영어회화 카페로 걸어가는 중이야." }, { en: "I am on my way home to run the washing machine.", ko: "세탁기 돌려놓으려고 지금 오피스텔 집으로 가는 길이야." }] },
-          { pattern: "10. Would you mind ~ing", sentences: [{ en: "Would you mind sharing this cable machine with me?", ko: "여기 케이블 머신 같이 번갈아가면서 써도 괜찮을까요?" }, { en: "Would you mind lowering the AC in the office?", ko: "사무실 에어컨 온도 조금만 올려주셔도 될까요?" }] },
-          { pattern: "11. If you don't mind", sentences: [{ en: "If you do not mind, let us take the stairs instead of the elevator.", ko: "괜찮으시다면 엘리베이터 대신 계단으로 걸어 올라가요." }, { en: "If you do not mind, I would like to finish my protein shake first.", ko: "괜찮으시다면 단백질 셰이크부터 마저 마실게요." }] },
-          { pattern: "12. What if ~", sentences: [{ en: "What if the swimming pool is fully booked this evening?", ko: "오늘 저녁에 수영장 자유 수영 자리가 꽉 차 있으면 어쩌지?" }, { en: "What if we double check our dive computers once more?", ko: "우리 다이브 컴퓨터 수치를 한 번 더 확인해보는 건 어떨까?" }] }
+          { pattern: "1. be supposed to (~하기로 되어 있다)", sentences: [
+            { en: "We are supposed to submit the report by Friday.", ko: "우리는 금요일까지 그 보고서를 제출하기로 되어 있어." },
+            { en: "You were supposed to give me a call when you arrived.", ko: "너 도착하면 나한테 전화 주기로 했었잖아." }
+          ]},
+          { pattern: "2. I want you to (~네가 ~해주면 좋겠어)", sentences: [
+            { en: "I want you to take a close look at this proposal.", ko: "네가 이 제안서를 꼼꼼히 한번 봐줬으면 좋겠어." },
+            { en: "I want you to be completely honest with me.", ko: "나한테 숨김없이 솔직하게 이야기해 줬으면 해." }
+          ]},
+          { pattern: "3. Why do you (~왜 너는 ~하니?)", sentences: [
+            { en: "Why do you always doubt yourself under pressure?", ko: "너는 왜 압박을 받을 때마다 항상 네 자신을 의심하니?" },
+            { en: "Why do you prefer working out so early in the morning?", ko: "너는 왜 그렇게 이른 아침에 운동하는 걸 선호해?" }
+          ]},
+          { pattern: "4. too 형용사 to 동사 (너무 ~해서 ...할 수 없다)", sentences: [
+            { en: "I'm too tired to think about that right now.", ko: "지금 당장은 너무 지쳐서 그것까지 생각할 겨를이 없어." },
+            { en: "The price is too high to justify the value.", ko: "그 가치를 감안하기엔 가격이 너무 비싸." }
+          ]},
+          { pattern: "5. 관계대명사 예문 (who / which / that)", sentences: [
+            { en: "She is the colleague who always handles tough situations calmly.", ko: "그녀는 힘든 상황에서도 항상 침착하게 대처하는 동료야." },
+            { en: "This is the car that I've wanted to buy for years.", ko: "이게 바로 내가 몇 년 동안 갖고 싶어 했던 그 차야." }
+          ]},
+          { pattern: "6. I'm worried about ~ (~가 걱정돼)", sentences: [
+            { en: "I'm worried about the sudden weather change.", ko: "갑작스러운 날씨 변화가 걱정돼." },
+            { en: "I'm worried about missing the final deadline.", ko: "최종 마감 시한을 놓칠까 봐 걱정이야." }
+          ]},
+          { pattern: "7. I'm worried that ~ (~할까 봐 / ~라서 걱정돼)", sentences: [
+            { en: "I'm worried that we might run out of time.", ko: "우리 시간이 부족할까 봐 걱정돼." },
+            { en: "I'm worried that this strategy won't work out.", ko: "이 전략이 잘 먹히지 않을까 봐 걱정이야." }
+          ]},
+          { pattern: "8. I'm afraid of ~ (~가 두려워 / 무서워)", sentences: [
+            { en: "I'm afraid of making a mistake in front of everyone.", ko: "사람들 앞에서 실수할까 봐 두려워." },
+            { en: "I'm not afraid of taking calculated risks.", ko: "나는 계산된 위험을 감수하는 것을 두려워하지 않아." }
+          ]},
+          { pattern: "9. I'm afraid that ~ (유감스럽게도 ~인 것 같아요)", sentences: [
+            { en: "I'm afraid that I can't make it to the dinner tonight.", ko: "유감스럽게도 오늘 저녁 식사에는 참석하기 어려울 것 같아요." },
+            { en: "I'm afraid that the item is currently out of stock.", ko: "유감스럽게도 그 품목은 현재 품절입니다." }
+          ]},
+          { pattern: "10. I'm heading to ~ (~로 향하는 중이야 / 가는 길이야)", sentences: [
+            { en: "I'm heading to the gym for an intense workout.", ko: "강도 높은 운동 한 판 하러 체육관으로 향하는 중이야." },
+            { en: "I'm heading to the airport to pick up my friend.", ko: "친구를 픽업하러 공항으로 가는 길이야." }
+          ]},
+          { pattern: "11. I'm on my way to ~ (~로 가는 중이야)", sentences: [
+            { en: "I'm on my way to the office right now.", ko: "나 지금 사무실로 출근하는 중이야." },
+            { en: "Don't worry, I'm already on my way to your place.", ko: "걱정 마, 이미 너희 집으로 가는 중이야." }
+          ]},
+          { pattern: "12. Would you mind ~ing? (~해주실 수 있으실까요?)", sentences: [
+            { en: "Would you mind opening the window for a second?", ko: "창문 좀 잠깐 열어주실 수 있을까요?" },
+            { en: "Would you mind waiting outside until we call your name?", ko: "저희가 성함을 부를 때까지 밖에서 잠시 기다려 주시겠어요?" }
+          ]}
         ],
         2: [
-          { pattern: "13. so 형용사 that", sentences: [{ en: "The leg workout was so intense that I could barely walk down the stairs.", ko: "하체 운동이 너무 빡세서 계단을 제대로 내려가지도 못했어." }, { en: "The iced coffee was so strong that it kept me wide awake all afternoon.", ko: "아이스 아메리카노가 워낙 진해서 오후 내내 잠이 확 깼어." }] },
-          { pattern: "14. so that", sentences: [{ en: "I prepped low carb meals so that I would not eat junk food.", ko: "불필요한 군것질을 안 하려고 저탄수 식단을 미리 준비해 뒀어." }, { en: "I woke up early so that I could run five kilometers outdoors.", ko: "야외에서 5킬로 러닝을 뛰려고 아침 일찍 일어났어." }] },
-          { pattern: "15. I appreciate that", sentences: [{ en: "I appreciate that you gave me feedback on my English accent.", ko: "내 영어 발음 피드백을 솔직하게 짚어줘서 정말 고마워." }, { en: "I appreciate that you spotted me on my heavy bench press.", ko: "벤치프레스 고중량 칠 때 보조 봐줘서 진심으로 고마워." }] },
-          { pattern: "16. I'm not interested in", sentences: [{ en: "I am not interested in drinking high sugar beverages.", ko: "설탕 많이 들어간 단 음료는 별로 마시고 싶지 않아." }, { en: "I am not interested in skipping my scheduled gym sessions.", ko: "정해둔 주 4회 운동 스케줄을 거르는 건 내 스타일이 아니야." }] },
-          { pattern: "17. I ended up ~ing", sentences: [{ en: "I ended up buying far more groceries than planned at Traders.", ko: "트레이더스 갔다가 계획했던 것보다 장을 훨씬 많이 보게 됐어." }, { en: "I ended up watching Chinese study clips on YouTube late at night.", ko: "밤늦게 유튜브로 중국어 회화 영상들을 계속 챙겨보게 됐어." }] },
-          { pattern: "18. How long have you been ~ing", sentences: [{ en: "How long have you been following this two day workout split?", ko: "이 상하체 2분할 루틴으로 운동하신 지 얼마나 되셨어요?" }, { en: "How long have you been practicing freediving equalization?", ko: "프리다이빙 프렌젤 이퀄라이징 연습하신 지는 얼마나 되셨나요?" }] },
-          { pattern: "19. How long has it been since ~", sentences: [{ en: "How long has it been since you returned from Thailand?", ko: "태국 여행 다녀오신 지 얼마나 되었나요?" }, { en: "How long has it been since you last visited your parents?", ko: "부모님 댁에 마지막으로 찾아뵌 지 얼마나 지났어?" }] },
-          { pattern: "20. I don't care about / what / if", sentences: [{ en: "I do not care about the rain as long as the gym is open.", ko: "헬스장만 열려 있다면 밖에 비가 오든 말든 난 상관없어." }, { en: "I do not care what other people think about my low carb diet.", ko: "내 저탄수화물 식단에 대해 남들이 뭐라고 하든 신경 안 써." }] },
-          { pattern: "21. I used to 동사원형", sentences: [{ en: "I used to do full body workouts before switching to a two day split.", ko: "2분할로 바꾸기 전에는 무분할 전신 운동을 하곤 했어." }, { en: "I used to drink sweet lattes, but now I only drink iced Americano.", ko: "예전엔 달달한 라떼를 마셨지만, 지금은 아이스 아메리카노만 마셔." }] },
-          { pattern: "22. I am used to ~ing", sentences: [{ en: "I am used to taking a quick cold shower every single morning.", ko: "매일 아침 찬물로 빠르게 샤워하는 루틴에 완전히 익숙해졌어." }, { en: "I am used to speaking conversational English in group meet-ups.", ko: "소모임에서 영어로 프리토킹하는 것에 이제 제법 익숙해." }] },
-          { pattern: "23. I'm thinking of ~ing", sentences: [{ en: "I am thinking of signing up for another diving trip this winter.", ko: "이번 겨울에 다이빙 투어 한 번 더 신청할까 고민 중이야." }, { en: "I am thinking of running along the riverbank tomorrow morning.", ko: "내일 아침에는 강변 따라 러닝을 좀 뛸까 생각 중이야." }] },
-          { pattern: "24. There are times when ~", sentences: [{ en: "There are times when I really crave carbs late at night.", ko: "밤늦게 탄수화물이 미친 듯이 당길 때가 종종 있어." }, { en: "There are times when my equalization suddenly clicks underwater.", ko: "물속에서 이퀄라이징 감각이 기가 막히게 딱 잡힐 때가 있어." }] }
+          { pattern: "13. If you don't mind (~괜찮으시다면)", sentences: [
+            { en: "If you don't mind, I'd like to reschedule our meeting.", ko: "괜찮으시다면 미팅 일정을 다시 잡고 싶습니다." },
+            { en: "If you don't mind, can you show me how you did that?", ko: "괜찮으시다면 그거 어떻게 하셨는지 좀 보여줄 수 있어?" }
+          ]},
+          { pattern: "14. What if ~? (~라면 어쩌지? / ~하면 어떨까?)", sentences: [
+            { en: "What if it rains heavily during our outdoor session?", ko: "야외 세션 중에 비가 엄청 쏟아지면 어쩌지?" },
+            { en: "What if we approach the problem from a totally different angle?", ko: "완전히 다른 각도에서 그 문제에 접근해보면 어떨까?" }
+          ]},
+          { pattern: "15. so 형용사 that 주어 동사 (너무 ~해서 ...하다)", sentences: [
+            { en: "The water was so clear that I could see the bottom easily.", ko: "물이 너무 맑아서 바닥이 훤히 다 들여다보였어." },
+            { en: "He spoke so fast that I could barely keep up.", ko: "그가 말을 너무 빠르게 해서 거의 따라갈 수가 없었어." }
+          ]},
+          { pattern: "16. so that 주어 동사 (~하기 위해서 / ~할 수 있도록)", sentences: [
+            { en: "I woke up early so that I could finish my workout before breakfast.", ko: "아침 식사 전에 운동을 끝내려고 일찍 일어났어." },
+            { en: "Please leave a note so that everyone stays on the same page.", ko: "모두가 상황을 공유할 수 있도록 메모를 남겨주세요." }
+          ]},
+          { pattern: "17. I appreciate that (~에 진심으로 감사드립니다)", sentences: [
+            { en: "I truly appreciate that you took the time to help me.", ko: "시간을 내어 저를 도와주신 점 진심으로 감사드립니다." },
+            { en: "I appreciate that you gave me straight and honest feedback.", ko: "솔직하고 직설적인 피드백을 주셔서 정말 감사합니다." }
+          ]},
+          { pattern: "18. I'm not interested in ~ (~에 관심 없어 / 흥미 없어)", sentences: [
+            { en: "I'm not interested in getting involved in office gossip.", ko: "나는 회사 내 가십거리에 끼어드는 데는 전혀 관심 없어." },
+            { en: "I'm not interested in wasting money on unnecessary things.", ko: "불필요한 곳에 돈을 낭비하는 데는 전혀 흥미가 없어." }
+          ]},
+          { pattern: "19. I ended up ~ing (결국 ~하게 되었어)", sentences: [
+            { en: "I ended up staying awake until three in the morning.", ko: "결국 새벽 세 시까지 잠들지 못하고 깨어 있었어." },
+            { en: "We ended up choosing a completely different location.", ko: "우리는 결국 완전히 다른 장소를 선택하게 되었어." }
+          ]},
+          { pattern: "20. How long have you been ~ing? (얼마나 오랫동안 ~해오셨어요?)", sentences: [
+            { en: "How long have you been practicing this sport?", ko: "이 운동을 얼마나 오래 해오셨나요?" },
+            { en: "How long have you been living in this neighborhood?", ko: "이 동네에서 거주하신 지는 얼마나 되셨어요?" }
+          ]},
+          { pattern: "21. How long has it been since ~? (~한 지 얼마나 지났어?)", sentences: [
+            { en: "How long has it been since you last visited Thailand?", ko: "태국에 마지막으로 다녀온 지 얼마나 지났어?" },
+            { en: "How long has it been since we had a proper dinner together?", ko: "우리 둘이 제대로 저녁 식사 같이한 지 얼마나 됐지?" }
+          ]},
+          { pattern: "22. I don't care about / what / if (~는 전혀 신경 안 써)", sentences: [
+            { en: "I don't care what other people think about my choices.", ko: "내 선택에 대해 남들이 뭐라고 생각하든 난 전혀 신경 안 써." },
+            { en: "I don't care about the temporary pain as long as I grow.", ko: "내가 성장할 수만 있다면 일시적인 고통 따위는 신경 쓰지 않아." }
+          ]},
+          { pattern: "23. I used to ~ (예전엔 ~하곤 했었어)", sentences: [
+            { en: "I used to eat lots of carbs, but now I avoid them completely.", ko: "예전엔 탄수화물을 많이 먹었지만 지금은 철저히 끊었어." },
+            { en: "I used to run along the river bank every weekend.", ko: "예전에는 주말마다 강변을 따라 달리곤 했었어." }
+          ]},
+          { pattern: "24. I am used to ~ (~에 익숙해져 있어)", sentences: [
+            { en: "I'm used to waking up early every single morning.", ko: "나는 매일 아침 일찍 일어나는 것에 완전히 익숙해." },
+            { en: "I'm used to dealing with tight deadlines under pressure.", ko: "나는 압박감 속에서 촉박한 마감 시한을 맞추는 일에 익숙해져 있어." }
+          ]}
         ],
         3: [
-          { pattern: "25. Make sure to ~", sentences: [{ en: "Make sure to hydrate properly before starting your heavy leg workout.", ko: "빡센 하체 운동 시작하기 전에 수분 보충 확실하게 해둬." }, { en: "Make sure to lock your studio apartment door when heading out.", ko: "오피스텔 문 나설 때 도어록 제대로 잠겼는지 꼭 확인해." }] },
-          { pattern: "26. I'm not going to ~", sentences: [{ en: "I am not going to skip my post workout protein shake today.", ko: "오늘 운동 끝나고 마시는 단백질 셰이크는 절대 안 거를 거야." }, { en: "I am not going to eat high carb snacks before going to sleep.", ko: "자기 전에 고탄수화물 간식은 절대 입에 안 댈 거야." }] },
-          { pattern: "27. I decided not to ~", sentences: [{ en: "I decided not to drink sugary coffee drinks anymore.", ko: "달달한 시럽 들어간 커피는 이제 더 이상 안 마시기로 결정했어." }, { en: "I decided not to overtrain my upper body without enough rest.", ko: "충분한 휴식 없이 상체 운동을 무리해서 과하게 하지 않기로 했어." }] },
-          { pattern: "28. Is there any [명사] ~?", sentences: [{ en: "Is there any low carb option available in the cafeteria today?", ko: "오늘 구내식당 메뉴 중에 저탄수화물 식단이 있나요?" }, { en: "Is there any lane available for lap swimming right now?", ko: "지금 수영장에 자유 레인 비어 있는 곳이 있나요?" }] },
-          { pattern: "29. Is there anything I can ~?", sentences: [{ en: "Is there anything I can help you with in the kitchen?", ko: "주방에서 저녁 요리 재료 준비하는 것 좀 도와줄까?" }, { en: "Is there anything I can do to correct my running posture?", ko: "내 러닝 자세 교정하는 데 도움 될 만한 팁이 있을까?" }] },
-          { pattern: "30. The thing is that ~", sentences: [{ en: "The thing is that consistency matters far more than intensity.", ko: "중요한 핵심은 운동 강도보다 매주 4회씩 꾸준히 나가는 거야." }, { en: "The thing is that I need more pool training for my diving stamina.", ko: "문제는 다이빙 호흡 체력을 위해 잠수풀 훈련이 더 필요하다는 점이야." }] },
-          { pattern: "31. I am good at ~ing", sentences: [{ en: "I am good at staying calm during deep breath holds.", ko: "나는 깊은 수심에서 숨 참을 때 멘탈 잡고 침착한 편이야." }, { en: "I am good at driving long distances to visit my parents.", ko: "나는 부모님 댁 갈 때 장거리 운전하는 건 꽤 잘해." }] },
-          { pattern: "32. I get so upset when ~", sentences: [{ en: "I get so upset when someone sits on a machine scrolling on their phone.", ko: "헬스장 머신에 앉아서 폰만 보며 자리 차지하고 있으면 정말 짜증 나." }, { en: "I get so upset when the laundry smells musty because of humidity.", ko: "습해서 세탁기 빨래에서 꿉꿉한 냄새가 나면 기분이 확 상해." }] },
-          { pattern: "33. be about to [동사]", sentences: [{ en: "I was about to leave the office to hit the gym.", ko: "헬스장으로 운동 가려고 사무실에서 딱 나서려던 참이었어." }, { en: "I was about to pay for my groceries at the Traders counter.", ko: "트레이더스 계산대에서 장본 것들 결제하려던 참이었어." }] },
-          { pattern: "34. I can't help but [동사원형]", sentences: [{ en: "I cannot help but admire his smooth freediving fin kick.", ko: "그의 부드러운 다이빙 핀 킥 자세를 보면 감탄이 절로 나와." }, { en: "I cannot help but order an iced Americano whenever I see a cafe.", ko: "카페 간판만 보이면 나도 모르게 아이스 아메리카노를 시키게 돼." }] },
-          { pattern: "35. I can't stop ~ing", sentences: [{ en: "I cannot stop watching running form tutorials on YouTube.", ko: "유튜브에서 러닝 자세 교정 영상들을 멈추지 않고 계속 보게 돼." }, { en: "I cannot stop thinking about the clear turquoise waters in Thailand.", ko: "태국 여행 때 봤던 그 에메랄드빛 바다가 머릿속에서 떠나질 않아." }] },
-          { pattern: "36. As I was saying ~", sentences: [{ en: "As I mentioned earlier, upper body day comes right after leg day.", ko: "아까 말씀드렸듯이 하체 운동 다음 날이 바로 상체 루틴이에요." }, { en: "As I was saying, keeping carbs low helped me drop body fat.", ko: "내가 말했듯이 탄수화물을 줄인 게 체지방 커팅하는 데 큰 도움이 됐어." }] }
+          { pattern: "25. I'm thinking of ~ (~할까 생각 중이야)", sentences: [
+            { en: "I'm thinking of getting a higher level certification this year.", ko: "올해 더 상위 레벨의 자격증을 취득해 볼까 생각 중이야." },
+            { en: "I'm thinking of taking a solo trip to clear my thoughts.", ko: "생각을 정리할 겸 혼자 여행을 떠나볼까 고민 중이야." }
+          ]},
+          { pattern: "26. There are times when ~ (~할 때가 종종 있어)", sentences: [
+            { en: "There are times when I just need complete silence and solitude.", ko: "완전한 침묵과 혼자만의 고독이 필요할 때가 있어." },
+            { en: "There are times when the plan doesn't go the way you want.", ko: "계획이 네가 원하는 대로 흘러가지 않을 때도 있는 법이야." }
+          ]},
+          { pattern: "27. Make sure to ~ (반드시 ~하도록 해)", sentences: [
+            { en: "Make sure to double check all the gear before entering the water.", ko: "물에 들어가기 전에 반드시 모든 장비를 이중 점검해." },
+            { en: "Make sure to back up the data before turning off the system.", ko: "시스템을 끄기 전에 반드시 데이터를 백업해 둬." }
+          ]},
+          { pattern: "28. I'm not going to ~ (~하지 않을 거야)", sentences: [
+            { en: "I'm not going to give up until I reach my target.", ko: "목표치에 도달할 때까지는 절대 포기하지 않을 거야." },
+            { en: "I'm not going to repeat the exact same mistake again.", ko: "똑같은 실수를 두 번 다시 반복하지 않을 작정이야." }
+          ]},
+          { pattern: "29. I decided not to ~ (~하지 않기로 결정했어)", sentences: [
+            { en: "I decided not to renew the contract with that vendor.", ko: "그 거래처와는 계약을 갱신하지 않기로 결정했어." },
+            { en: "I decided not to push myself too hard today.", ko: "오늘은 너무 무리해서 내 몸을 몰아붙이지 않기로 했어." }
+          ]},
+          { pattern: "30. Is there any ~? / Is there anything I can ~?", sentences: [
+            { en: "Is there any spare room available for this weekend?", ko: "이번 주말에 남는 방이 혹시 있나요?" },
+            { en: "Is there anything I can do to make this easier for you?", ko: "너한테 도움이 되도록 내가 해줄 수 있는 일이 있을까?" }
+          ]},
+          { pattern: "31. The thing is that ~ (문제는 ~라는 거야)", sentences: [
+            { en: "The thing is that we simply ran out of operational budget.", ko: "핵심적인 문제는 우리가 운영 예산을 다 써버렸다는 점이야." },
+            { en: "The thing is that nobody actually spoke up during the meeting.", ko: "문제는 정작 회의 중에 아무도 소신껏 발언하지 않았다는 거지." }
+          ]},
+          { pattern: "32. I am good at ~ (~를 꽤 잘해)", sentences: [
+            { en: "I'm good at staying calm even under heavy stress.", ko: "나는 극심한 스트레스 속에서도 침착함을 유지하는 걸 잘해." },
+            { en: "I'm good at finding practical solutions to complex issues.", ko: "나는 복잡한 문제에서 실질적인 해결책을 찾아내는 데 능숙해." }
+          ]},
+          { pattern: "33. I get so upset when ~ (~할 때 정말 화나고 속상해)", sentences: [
+            { en: "I get so upset when people fail to keep their promises.", ko: "사람들이 약속을 지키지 않을 때 난 정말 화가 나." },
+            { en: "I get so upset when precious time gets completely wasted.", ko: "소중한 시간이 완전히 낭비될 때 너무 속이 상해." }
+          ]},
+          { pattern: "34. be about to ~ (막 ~하려던 참이다)", sentences: [
+            { en: "I was just about to give you a call regarding the project.", ko: "막 그 프로젝트 건으로 너한테 전화하려던 참이었어." },
+            { en: "The train is about to depart, so let's hurry up.", ko: "기차가 막 출발하려 하니 서두르자." }
+          ]},
+          { pattern: "35. I can't help but ~ / I can't stop ~ (~하지 않을 수 없다)", sentences: [
+            { en: "I can't help but admire his relentless discipline.", ko: "그의 지독한 자기 절제력에는 감탄하지 않을 수가 없어." },
+            { en: "I can't stop thinking about new creative business ideas.", ko: "새롭고 창의적인 사업 아이디어 생각을 멈출 수가 없어." }
+          ]},
+          { pattern: "36. As I was saying ~ / As I mentioned earlier ~ (아까 말했듯이)", sentences: [
+            { en: "As I mentioned earlier, safety must always come first.", ko: "앞서 제가 말씀드렸듯이, 안전이 항상 최우선이어야 합니다." },
+            { en: "As I was saying, the core principle will never change.", ko: "제가 아까 이야기하던 것처럼, 본질적인 원칙은 절대 변하지 않아." }
+          ]}
         ],
         4: [
-          { pattern: "37. That depends on ~", sentences: [{ en: "That depends on how heavy my bench press session was today.", ko: "그건 오늘 벤치프레스 훈련 강도가 얼마나 높았느냐에 달려 있어." }, { en: "That depends on whether the traffic is heavy on the highway.", ko: "그건 고속도로에 차가 얼마나 막히는지 도로 상황에 달려 있어." }] },
-          { pattern: "38. What I'm saying is that ~", sentences: [{ en: "What I am saying is that recovery is just as important as lifting.", ko: "내가 말하고자 하는 핵심은 쇠질만큼이나 근육 휴식이 중요하다는 거야." }, { en: "What I am saying is that you should practice speaking English out loud.", ko: "내 말은 영어를 소리 내서 입으로 직접 뱉어봐야 실력이 는다는 거야." }] },
-          { pattern: "39. That's all [주어] [동사]", sentences: [{ en: "That is all I bought at the grocery store for this week's meal prep.", ko: "이번 주 식단 관리를 위해 마트에서 장본 건 그게 전부야." }, { en: "That is all I need to focus on during my breath hold.", ko: "숨 참기 훈련을 할 때 내가 온전히 집중해야 할 것은 그것뿐이야." }] },
-          { pattern: "40. I hardly ever ~ / I always ~", sentences: [{ en: "I hardly ever skip my morning shower before heading out.", ko: "아침에 외출하기 전 샤워하는 루틴은 거의 거르는 법이 없어." }, { en: "I always track my daily protein intake on my phone.", ko: "나는 매일 먹는 순수 단백질 섭취량을 휴대폰으로 항상 기록해." }] },
-          { pattern: "41. This is my first time ~ing", sentences: [{ en: "This is my first time driving all the way down here by myself.", ko: "여기까지 혼자 장거리 운전해서 내려와 본 건 이번이 처음이야." }, { en: "This is my first time running ten kilometers without stopping.", ko: "한 번도 쉬지 않고 10킬로 야외 러닝을 완주한 건 이번이 처음이야." }] },
-          { pattern: "42. What made you + 동사원형 ~?", sentences: [{ en: "What made you start freediving in the first place?", ko: "처음에 프리다이빙은 어떤 계기로 시작하게 되신 거예요?" }, { en: "What made you choose this studio apartment near the park?", ko: "공원 근처에 있는 이 오피스텔을 고른 특별한 이유가 있나요?" }] },
-          { pattern: "43. I was hoping to / that", sentences: [{ en: "I was hoping to finish my workout before the gym got crowded.", ko: "헬스장에 사람 많아지기 전에 운동을 일찍 끝내고 싶었어." }, { en: "I was hoping that the weather in Thailand would stay sunny.", ko: "태국에 머무는 동안 날씨가 계속 맑기를 진심으로 바랐지." }] },
-          { pattern: "44. [주어] remind me of ~", sentences: [{ en: "This warm summer breeze reminds me of my recent trip to Thailand.", ko: "이 따뜻한 여름밤 바람을 맞으니 지난달 다녀온 태국 생각이 나네." }, { en: "This fresh salad reminds me of the clean diet I prepared last week.", ko: "이 신선한 샐러드를 보니까 지난주에 해 먹었던 클린 식단이 떠올라." }] },
-          { pattern: "45. must have p.p. / could have p.p.", sentences: [{ en: "I must have left my gym pass inside my other backpack.", ko: "헬스장 회원권을 다른 백팩 안에 두고 온 게 분명해." }, { en: "I could have improved my breath hold if I had relaxed my shoulders.", ko: "어깨 힘만 더 뺐어도 숨을 훨씬 오래 참을 수 있었을 텐데." }] },
-          { pattern: "46. would have p.p. / should have p.p.", sentences: [{ en: "I should have bought more chicken breast when it was on sale.", ko: "할인 행사할 때 트레이더스에서 닭가슴살을 더 많이 쟁여뒀어야 했어." }, { en: "I would have gone for an outdoor run if it had not rained.", ko: "비만 안 왔어도 공원으로 야외 러닝을 뛰러 나갔을 거야." }] },
-          { pattern: "47. Although / While [문장]", sentences: [{ en: "Although my legs were tired, I still completed my four sets of squats.", ko: "비록 다리는 무거웠지만 스쿼트 4세트를 끝까지 다 채웠어." }, { en: "While the washing machine is running, I usually review my Chinese.", ko: "세탁기가 돌아가는 동안 나는 보통 중국어 회화를 복습해." }] },
-          { pattern: "48. As soon as ~ / Before / After", sentences: [{ en: "As soon as I wake up, I drink a glass of water and take a shower.", ko: "아침에 눈뜨자마자 물 한잔 마시고 바로 샤워를 해." }, { en: "After finishing my upper body workout, I always drink my protein.", ko: "상체 운동을 끝마친 후에는 항상 단백질 보충제를 챙겨 마셔." }] }
+          { pattern: "37. That depends on ~ / What I'm saying is ~ (그건 ~에 달렸지 / 내 말의 요지는)", sentences: [
+            { en: "That depends on how effectively we manage our resources.", ko: "그건 우리가 자원을 얼마나 효율적으로 관리하느냐에 달렸지." },
+            { en: "What I'm saying is that we need a more aggressive mindset.", ko: "내 말의 핵심 요지는 우리가 더 적극적인 마인드를 가져야 한다는 거야." }
+          ]},
+          { pattern: "38. That's all 주어 동사 (그게 전부야)", sentences: [
+            { en: "That is all I need to know before making a decision.", ko: "결정을 내리기 전에 내가 알아야 할 건 그게 전부야." },
+            { en: "That is all we can do under the current circumstances.", ko: "현재 상황에서 우리가 할 수 있는 건 그게 다야." }
+          ]},
+          { pattern: "39. 빈도표현 (hardly ever / always / almost everyday)", sentences: [
+            { en: "I hardly ever consume sugary drinks or processed junk food.", ko: "나는 설탕 음료나 가공식품은 거의 입에 대지 않아." },
+            { en: "I work out and practice breath control almost every single day.", ko: "나는 거의 매일 운동을 하고 호흡 훈련을 연습해." }
+          ]},
+          { pattern: "40. How many times ~ / Have you ever ~ / How often do you ~?", sentences: [
+            { en: "How many times did you practice that move today?", ko: "오늘 그 동작 몇 번이나 연습하셨어요?" },
+            { en: "How often do you go open water swimming in the ocean?", ko: "바다 오픈워터 수영은 얼마나 자주 나가시나요?" }
+          ]},
+          { pattern: "41. This is my first time I've ~ (~해본 건 이번이 처음이야)", sentences: [
+            { en: "This is my first time I've pushed myself this hard.", ko: "내 자신을 이렇게 한계까지 몰아붙여 본 건 이번이 처음이야." },
+            { en: "This is my first time I've seen such incredible visibility in the water.", ko: "물속 시야가 이렇게 환상적인 건 이번에 처음 봤어." }
+          ]},
+          { pattern: "42. What made you ~? (어떤 계기로 ~했어?)", sentences: [
+            { en: "What made you decide to run your own business?", ko: "어떤 계기로 너만의 사업을 운영하기로 결심하게 된 거야?" },
+            { en: "What made you change your mind so suddenly?", ko: "갑자기 무슨 이유로 마음을 그렇게 바꾼 거야?" }
+          ]},
+          { pattern: "43. I was hoping to ~ / I was hoping that ~ (~하기를 바라고 있었어)", sentences: [
+            { en: "I was hoping to discuss the details of the contract in person.", ko: "계약 세부 사항을 직접 만나서 상의하기를 바라고 있었어요." },
+            { en: "I was hoping that we could wrap up the deal by this week.", ko: "이번 주까지는 그 거래를 매듭지을 수 있기를 기대하고 있었어." }
+          ]},
+          { pattern: "44. 주어 remind me of ~ (~는 나에게 ...를 떠올리게 해)", sentences: [
+            { en: "This peaceful ocean reminds me of my childhood hometown.", ko: "이 평화로운 바다는 내 어린 시절 고향을 떠올리게 해." },
+            { en: "His unwavering focus reminds me of a true professional.", ko: "그의 흔들림 없는 집중력은 진정한 프로의 모습을 떠올리게 해." }
+          ]},
+          { pattern: "45. must have p.p. / could have p.p. (~했음에 틀림없다 / ~할 수도 있었을 텐데)", sentences: [
+            { en: "He must have prepared thoroughly for this project.", ko: "그는 이번 프로젝트를 위해 철저하게 준비했음에 틀림없어." },
+            { en: "If we had taken the highway, we could have arrived much earlier.", ko: "고속도로를 탔더라면 우리가 훨씬 더 일찍 도착할 수도 있었을 텐데." }
+          ]},
+          { pattern: "46. would have p.p. / should have p.p. (~했을 텐데 / ~했어야 했는데)", sentences: [
+            { en: "I should have inspected the condition of the gear yesterday.", ko: "어제 장비 상태를 미리 점검해 뒀어야 했는데." },
+            { en: "If it hadn't rained, I would've gone out to the park for an outdoor run.", ko: "비만 안 왔어도 공원으로 야외 러닝을 뛰러 나갔을 거야." }
+          ]},
+          { pattern: "47. although / while / if 가정 과거", sentences: [
+            { en: "Although the schedule was hectic, we managed to pull it off.", ko: "일정이 매우 빡빡했음에도 불구하고 우리는 멋지게 해냈어." },
+            { en: "If I had enough free time, I would spend three months diving.", ko: "시간적 여유만 있다면 석 달 내내 다이빙만 하면서 지낼 텐데." }
+          ]},
+          { pattern: "48. 시간 부사절 (before / after / when / as soon as)", sentences: [
+            { en: "As soon as the meeting finishes, I will call you directly.", ko: "회의가 끝나는 즉시 너한테 직접 전화할게." },
+            { en: "After an intense training session, make sure to hydrate properly.", ko: "격렬한 훈련 세션을 마친 후에는 반드시 수분을 충분히 보충해." }
+          ]}
         ]
       }
     };
 
-    let currentCourse = 1;
-    let currentDay = 1;
     let isStopped = false;
-    let loopTimeout = null;
-    let lastTapTime = 0;
-    const MAX_COUNT = 1000;
-
-    let reviewList = JSON.parse(localStorage.getItem('culcom_review_list') || '[]');
-
-    function saveReviewList() {
-      localStorage.setItem('culcom_review_list', JSON.stringify(reviewList));
-      document.getElementById('rev-count').innerText = reviewList.length;
-    }
-
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     let maleVoice = null;
     let femaleVoice = null;
+    let currentCourse = 1;
+    let currentDay = 1;
 
-    function initVoices() {
-      const v = window.speechSynthesis.getVoices();
-      if (!v || v.length === 0) return;
+    // PiP 캔버스 미디어 스트림
+    const canvas = document.getElementById('pip-canvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('pip-video');
 
-      const usVoices = v.filter(x => x.lang === 'en-US' || x.lang === 'en_US');
-      const allEn = v.filter(x => x.lang.startsWith('en'));
-      const pool = usVoices.length > 0 ? usVoices : allEn;
+    function updateCanvas(text, count, maxCount) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('English Shadowing', 20, 45);
 
-      maleVoice = pool.find(x => /david|guy|george|male/i.test(x.name)) || pool[0];
-      femaleVoice = pool.find(x => /female|zira|jenny|samantha|susan|karen|victoria/i.test(x.name));
-      if (!femaleVoice) {
-        femaleVoice = pool.find(x => x !== maleVoice) || pool[0];
-      }
-    }
-    window.speechSynthesis.onvoiceschanged = initVoices;
-    initVoices();
-
-    function fixPronunciation(text) {
-      return text.replace(/freediving/gi, "free-diving")
-                 .replace(/Freediving/gi, "Free-diving");
-    }
-
-    async function lockScreenWake() {
-      if ('wakeLock' in navigator) {
-        try { await navigator.wakeLock.request('screen'); } catch(e) {}
-      }
-    }
-
-    function toggleAnswer(eid, btn) {
-      const el = document.getElementById(eid);
-      if (el.classList.contains('hidden')) {
-        el.classList.remove('hidden');
-        btn.innerText = "🙈 가리기";
-      } else {
-        el.classList.add('hidden');
-        btn.innerText = "👁️ 정답 확인";
-      }
-    }
-
-    function toggleSpeed(btn) {
-      const v = parseFloat(btn.dataset.val);
-      if (v === 0.85) { 
-        btn.dataset.val = '1.0'; 
-        btn.innerText = '1.0x (보통)'; 
-      } else if (v === 1.0) { 
-        btn.dataset.val = '1.25'; 
-        btn.innerText = '1.25x (빠름)'; 
-      } else if (v === 1.25) { 
-        btn.dataset.val = '1.5'; 
-        btn.innerText = '1.5x (최대)'; 
-      } else if (v === 1.5) { 
-        btn.dataset.val = '0.75'; 
-        btn.innerText = '0.75x (느림)'; 
-      } else { 
-        btn.dataset.val = '0.85'; 
-        btn.innerText = '0.85x (기본)'; 
-      }
-    }
-
-    function toggleGender(btn) {
-      if (btn.dataset.val === 'male') {
-        btn.dataset.val = 'female';
-        btn.innerText = '👩 여성';
-      } else {
-        btn.dataset.val = 'male';
-        btn.innerText = '👨 남성';
-      }
-    }
-
-    function toggleReviewItem(en, ko, btn) {
-      const idx = reviewList.findIndex(item => item.en === en);
-      if (idx > -1) {
-        reviewList.splice(idx, 1);
-        btn.classList.remove('active');
-        btn.innerText = "⭐ 복습 추가";
-      } else {
-        reviewList.push({ en, ko });
-        btn.classList.add('active');
-        btn.innerText = "★ 복습 중";
-      }
-      saveReviewList();
-
-      if (currentCourse === 'review') {
-        renderCards();
-      }
-    }
-
-    function activateLockScreen() {
-      const curtain = document.getElementById('dark-curtain');
-      curtain.style.display = 'flex';
-      lockScreenWake();
-
-      const docEl = document.documentElement;
-      if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
-      else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen().catch(() => {});
-    }
-
-    function handleCurtainTap() {
-      const now = new Date().getTime();
-      if (now - lastTapTime < 350) {
-        document.getElementById('dark-curtain').style.display = 'none';
-        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(() => {});
-      }
-      lastTapTime = now;
-    }
-
-    // 커스텀 문장 모달 조작
-    function openCustomModal() {
-      document.getElementById('custom-modal').style.display = 'flex';
-      document.getElementById('custom-en').focus();
-    }
-
-    function closeCustomModal() {
-      document.getElementById('custom-modal').style.display = 'none';
-    }
-
-    function playCustomSentence() {
-      const enInput = document.getElementById('custom-en').value.trim();
-      const koInput = document.getElementById('custom-ko').value.trim() || '내가 직접 입력한 문장';
-      const shouldSave = document.getElementById('save-to-review').checked;
-
-      if (!enInput) {
-        alert("영어 문장을 입력해 주세요!");
-        return;
-      }
-
-      if (shouldSave) {
-        const exists = reviewList.some(item => item.en.toLowerCase() === enInput.toLowerCase());
-        if (!exists) {
-          reviewList.push({ en: enInput, ko: koInput });
-          saveReviewList();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px sans-serif';
+      const words = (text || '').split(' ');
+      let line = '';
+      let y = 90;
+      for (let w of words) {
+        if ((line + w).length > 28) {
+          ctx.fillText(line, 20, y);
+          line = w + ' ';
+          y += 26;
+        } else {
+          line += w + ' ';
         }
       }
+      ctx.fillText(line, 20, y);
 
-      closeCustomModal();
-      document.getElementById('custom-en').value = "";
-      document.getElementById('custom-ko').value = "";
+      ctx.fillStyle = '#4ade80';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(count ? `${count} / ${maxCount}회` : '준비 완료', 20, 215);
+    }
+    updateCanvas("Ready", 0, 100);
 
-      // 임의의 상태창 id 전달 후 1,000회 재생 시작
-      start1000Loop(enInput, null, null, null);
+    try {
+      const stream = canvas.captureStream(15);
+      video.srcObject = stream;
+    } catch(e) {}
+
+    async function togglePiP() {
+      try {
+        await video.play();
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else if (document.pictureInPictureEnabled) {
+          await video.requestPictureInPicture();
+        }
+      } catch (err) {
+        alert("먼저 문장의 [▶ 반복 재생] 버튼을 누른 다음 PiP 버튼을 눌러주세요.");
+      }
     }
 
-    // 1,000회 음성 재생 엔진
-    function start1000Loop(originalText, sid, gid, spid) {
+    const silenceAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+    silenceAudio.loop = true;
+
+    // 음성 탐색 및 남/여 분리
+    function loadVoices() {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices || voices.length === 0) return;
+
+      const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+
+      maleVoice = englishVoices.find(v => /male|david|guy|george/i.test(v.name)) 
+               || englishVoices.find(v => !/female|zira|susan|jenny|samantha/i.test(v.name)) 
+               || englishVoices[0];
+
+      femaleVoice = englishVoices.find(v => /female|zira|susan|jenny|samantha/i.test(v.name)) 
+                 || englishVoices[englishVoices.length - 1] 
+                 || englishVoices[0];
+
+      const sysBar = document.getElementById('sys-status');
+      if (sysBar) {
+        sysBar.innerText = "음성 엔진 탑재 완료 (" + (maleVoice ? maleVoice.name : "기본") + ")";
+        sysBar.style.color = "#047857";
+      }
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function toggleGender(btn) {
+      if (btn.innerText.includes("남성")) {
+        btn.innerText = "👩 여성";
+        btn.dataset.gender = "female";
+      } else {
+        btn.innerText = "👨 남성";
+        btn.dataset.gender = "male";
+      }
+    }
+
+    const speedCycle = [1.0, 1.25, 1.5, 2.0, 0.8];
+    function cycleSpeed(btn) {
+      let cur = parseFloat(btn.dataset.speed || "1.0");
+      let nextIdx = (speedCycle.indexOf(cur) + 1) % speedCycle.length;
+      let nextSpeed = speedCycle[nextIdx];
+      btn.dataset.speed = nextSpeed.toString();
+      btn.innerText = "⚡ " + nextSpeed + "x";
+    }
+
+    function playAudio(text, statusId, gid, spid) {
       window.speechSynthesis.cancel();
-      clearTimeout(loopTimeout);
+      window.speechSynthesis.resume();
+      
+      video.play().catch(() => {});
+      silenceAudio.play().catch(() => {});
+
       isStopped = false;
       let count = 0;
+      const maxCount = parseInt(document.getElementById('repeat-select').value) || 100;
+      const statusElem = document.getElementById(statusId);
+      const gender = document.getElementById(gid).dataset.gender;
+      const speed = parseFloat(document.getElementById(spid).dataset.speed);
 
-      const status = sid ? document.getElementById(sid) : null;
-      const gender = gid ? document.getElementById(gid).dataset.val : 'male';
-      let speed = spid ? parseFloat(document.getElementById(spid).dataset.val) : 0.85;
-      
-      let adjustedRate = speed;
-      if (isMobile && speed >= 1.0) adjustedRate = speed * 0.95;
+      let targetVoice = (gender === 'female') ? femaleVoice : maleVoice;
+      let pitchValue = (gender === 'female') ? 1.25 : 0.8;
 
-      const isFemale = (gender === 'female');
-      const voice = isFemale ? femaleVoice : maleVoice;
-      const targetPitch = isFemale ? 1.3 : 0.85;
-
-      const speechText = fixPronunciation(originalText);
-
-      document.getElementById('dark-text').innerText = originalText;
-      lockScreenWake();
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: text,
+          artist: `영어회화 (${gender === 'female' ? '여성' : '남성'}, ${speed}x)`,
+          album: `Day ${currentDay}`
+        });
+      }
 
       function loop() {
-        if (isStopped || count >= MAX_COUNT) {
+        if (isStopped || count >= maxCount) {
           if (!isStopped) {
-            if (status) status.innerText = "1,000회 완료";
-            document.getElementById('dark-count').innerText = "완료";
+            statusElem.innerText = `${maxCount}회 완료`;
+            updateCanvas(text, maxCount, maxCount);
+            silenceAudio.pause();
           }
           return;
         }
-
         count++;
-        if (status) status.innerText = count + " / " + MAX_COUNT + "회";
-        document.getElementById('dark-count').innerText = count + " / " + MAX_COUNT;
+        statusElem.innerText = `${count} / ${maxCount}회`;
+        updateCanvas(text, count, maxCount);
 
-        const u = new SpeechSynthesisUtterance(speechText);
-        u.lang = 'en-US';
-        if (voice) u.voice = voice;
-        u.rate = adjustedRate;
-        u.pitch = targetPitch;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        if (targetVoice) utter.voice = targetVoice;
+        utter.pitch = pitchValue;
+        utter.rate = speed;
+        utter.volume = 1.0;
 
-        u.onend = function() {
-          if (!isStopped && count < MAX_COUNT) {
+        utter.onend = function() {
+          if (!isStopped && count < maxCount) {
             const pauseTime = Math.max(350, Math.floor(750 / speed));
-            loopTimeout = setTimeout(loop, pauseTime);
-          } else if (count >= MAX_COUNT) {
-            if (status) status.innerText = "1,000회 완료";
-            document.getElementById('dark-count').innerText = "완료";
+            setTimeout(loop, pauseTime);
+          } else if (count >= maxCount) {
+            statusElem.innerText = `${maxCount}회 완료`;
+            updateCanvas(text, maxCount, maxCount);
+            silenceAudio.pause();
           }
         };
 
-        u.onerror = function() {
-          if (!isStopped && count < MAX_COUNT) {
-            loopTimeout = setTimeout(loop, 500);
-          }
+        utter.onerror = function() {
+          statusElem.innerText = "재생 오류";
         };
 
-        window.speechSynthesis.speak(u);
+        window.speechSynthesis.speak(utter);
       }
 
       loop();
     }
 
-    function stopLoop(sid) {
+    function stopAudio(statusId) {
       isStopped = true;
-      clearTimeout(loopTimeout);
       window.speechSynthesis.cancel();
-      if (sid && document.getElementById(sid)) {
-        document.getElementById(sid).innerText = "정지됨";
-      }
-      document.getElementById('dark-count').innerText = "정지됨";
+      silenceAudio.pause();
+      document.getElementById(statusId).innerText = "정지됨";
+      updateCanvas("정지됨", 0, 100);
     }
 
-    function renderCards() {
-      const box = document.getElementById('card-list');
-      box.innerHTML = "";
-
-      if (currentCourse === 'review') {
-        document.getElementById('day-selector-wrap').style.display = 'none';
-        if (reviewList.length === 0) {
-          box.innerHTML = `<div style="text-align:center; padding: 40px 10px; color:#64748b; font-weight:bold;">
-            ⭐ 복습함이 비어 있습니다.<br><br>좌측 하단 <b>[✍️ 문장 입력]</b>을 눌러 나만의 문장을 추가하거나,<br>기초 목록에서 <b>[⭐ 복습 추가]</b>를 눌러보세요!
-          </div>`;
-          return;
-        }
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        let html = `<div class="pattern-header" style="color:#e11d48;">⭐ 내가 담은 복습 문장 모음 (${reviewList.length}개)</div>`;
-
-        reviewList.forEach((s, idx) => {
-          const sid = `st_rev_${idx}`;
-          const eid = `en_rev_${idx}`;
-          const gid = `gen_rev_${idx}`;
-          const spid = `spd_rev_${idx}`;
-          const cleanEn = s.en.replace(/'/g, "\\'");
-
-          html += `
-            <div class="qa-box">
-              <div class="ko-text">🇰🇷 ${s.ko}</div>
-              <div class="en-text hidden" id="${eid}">🇺🇸 ${s.en}</div>
-              
-              <div class="ctrl-row">
-                <button class="ctrl-btn btn-ans" onclick="toggleAnswer('${eid}', this)">👁️ 정답 확인</button>
-                <button class="ctrl-btn btn-review-toggle active" onclick="toggleReviewItem('${cleanEn}', '${s.ko}', this)">★ 복습 중</button>
-                <button class="ctrl-btn opt-btn" id="${gid}" data-val="male" onclick="toggleGender(this)">👨 남성</button>
-                <button class="ctrl-btn opt-btn" id="${spid}" data-val="0.85" onclick="toggleSpeed(this)">0.85x (기본)</button>
-                <button class="ctrl-btn btn-play" onclick="start1000Loop('${cleanEn}', '${sid}', '${gid}', '${spid}')">▶ 1000회</button>
-                <button class="ctrl-btn btn-stop" onclick="stopLoop('${sid}')">정지</button>
-                <span class="status-text" id="${sid}"></span>
-              </div>
-            </div>
-          `;
-        });
-        card.innerHTML = html;
-        box.appendChild(card);
-        return;
-      }
-
-      document.getElementById('day-selector-wrap').style.display = 'flex';
-      const patterns = dataset[currentCourse][currentDay];
+    function renderCurrentView() {
+      const container = document.getElementById('player-body');
+      container.innerHTML = "";
+      const patterns = database[currentCourse][currentDay];
 
       patterns.forEach((p, pIdx) => {
         const card = document.createElement('div');
-        card.className = 'card';
-        let html = `<div class="pattern-header">${p.pattern}</div>`;
-
+        card.className = 'pattern-card';
+        let html = `<div class="pattern-title">${p.pattern}</div>`;
+        
         p.sentences.forEach((s, sIdx) => {
           const sid = `st_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
-          const eid = `en_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
-          const gid = `gen_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
-          const spid = `spd_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
-          const cleanEn = s.en.replace(/'/g, "\\'");
-          const isRev = reviewList.some(item => item.en === s.en);
-
+          const gid = `gender_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
+          const spid = `speed_${currentCourse}_${currentDay}_${pIdx}_${sIdx}`;
+          const cleanText = s.en.replace(/'/g, "\\'");
           html += `
-            <div class="qa-box">
-              <div class="ko-text">🇰🇷 ${s.ko}</div>
-              <div class="en-text hidden" id="${eid}">🇺🇸 ${s.en}</div>
-              
-              <div class="ctrl-row">
-                <button class="ctrl-btn btn-ans" onclick="toggleAnswer('${eid}', this)">👁️ 정답 확인</button>
-                <button class="ctrl-btn btn-review-toggle ${isRev ? 'active' : ''}" onclick="toggleReviewItem('${cleanEn}', '${s.ko}', this)">
-                  ${isRev ? '★ 복습 중' : '⭐ 복습 추가'}
-                </button>
-                <button class="ctrl-btn opt-btn" id="${gid}" data-val="male" onclick="toggleGender(this)">👨 남성</button>
-                <button class="ctrl-btn opt-btn" id="${spid}" data-val="0.85" onclick="toggleSpeed(this)">0.85x (기본)</button>
-                <button class="ctrl-btn btn-play" onclick="start1000Loop('${cleanEn}', '${sid}', '${gid}', '${spid}')">▶ 1000회</button>
-                <button class="ctrl-btn btn-stop" onclick="stopLoop('${sid}')">정지</button>
-                <span class="status-text" id="${sid}"></span>
+            <div class="sentence-row">
+              <div class="text-box">
+                <div class="en">${s.en}</div>
+                <div class="ko">${s.ko}</div>
+              </div>
+              <div class="btn-group">
+                <button class="toggle-btn" id="${gid}" data-gender="male" onclick="toggleGender(this)">👨 남성</button>
+                <button class="toggle-btn" id="${spid}" data-speed="1.0" onclick="cycleSpeed(this)">⚡ 1.0x</button>
+                <button class="ctrl-btn btn-play" onclick="playAudio('${cleanText}', '${sid}', '${gid}', '${spid}')">▶ 반복 재생</button>
+                <button class="ctrl-btn btn-stop" onclick="stopAudio('${sid}')">정지</button>
+                <span class="status" id="${sid}"></span>
               </div>
             </div>
           `;
         });
-
         card.innerHTML = html;
-        box.appendChild(card);
+        container.appendChild(card);
       });
     }
 
-    function switchCourse(c) {
-      stopLoop('');
-      currentCourse = c;
-      document.getElementById('c1-btn').className = (c === 1) ? "course-btn active" : "course-btn";
-      document.getElementById('c2-btn').className = (c === 2) ? "course-btn active" : "course-btn";
-      document.getElementById('cr-btn').className = (c === 'review') ? "course-btn review-tab active" : "course-btn review-tab";
-      renderCards();
+    function switchCourse(courseNum) {
+      window.speechSynthesis.cancel();
+      silenceAudio.pause();
+      currentCourse = courseNum;
+
+      document.getElementById('cbtn-1').classList.toggle('active', courseNum === 1);
+      document.getElementById('cbtn-2').classList.toggle('active', courseNum === 2);
+
+      renderCurrentView();
     }
 
-    function switchDay(d) {
-      stopLoop('');
-      currentDay = d;
-      const b = document.querySelectorAll('.day-btn');
-      b.forEach((btn, idx) => {
-        btn.className = (idx + 1 === d) ? "day-btn active" : "day-btn";
+    function switchDay(dayNum) {
+      window.speechSynthesis.cancel();
+      silenceAudio.pause();
+      currentDay = dayNum;
+      
+      const buttons = document.querySelectorAll('.day-btn');
+      buttons.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === dayNum);
       });
-      renderCards();
+
+      renderCurrentView();
     }
 
-    saveReviewList();
-    renderCards();
+    renderCurrentView();
   </script>
 </body>
 </html>
